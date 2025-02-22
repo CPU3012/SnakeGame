@@ -2,22 +2,23 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: g++.exe build active file",
-            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+            "label": "C/C++: g++.exe build project",
+            "command": "C:/msys64/ucrt64/bin/g++.exe", //Replace this with your compiler
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "-I${fileDirname}/external/raylib/src",
+                "-L${fileDirname}/external/raylib/src",
+                "${fileDirname}/main.cpp",
+                "${fileDirname}/game.cpp",
+                "-lraylib",
+                "-lgdi32",
+                "-lwinmm",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-L",
-                "${fileDirname}\\external",
-                "-I",
-                "${fileDirname}\\external",
-                "${fileDirname}\\external\\raylib\\raylib\\src\\libraylib.a" // Specify the library file directly C:\GitHub\SnakeGame\external\raylib\raylib\src\libraylib.a
+                "C:/GitHub/SnakeGame/bin/game.exe" //Replace this with where you want the .exe to be generated
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                //"cwd": "C:/msys64/ucrt64/bin" //I don't know if I need this
             },
             "problemMatcher": [
                 "$gcc"

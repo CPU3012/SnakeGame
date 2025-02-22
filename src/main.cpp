@@ -1,5 +1,8 @@
-#include <iostream>
+#include "game.hpp"
 
 int main() {
-    std::cout << "Hello World";
+    Game game;
+    game.play();
 }
+
+// ctr shift B
