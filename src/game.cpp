@@ -112,7 +112,7 @@ void Game::update(Snake& snake, Tile (&tiles)[8][8]) {
         }
     }
 
-    TraceLog(LOG_INFO, "Position: %d, %d", int(snake.m_headPosition.x), int(snake.m_headPosition.y));
+    //TraceLog(LOG_INFO, "Position: %d, %d", int(snake.m_headPosition.x), int(snake.m_headPosition.y));
 
 }
 
