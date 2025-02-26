@@ -6,6 +6,7 @@
             "command": "C:/msys64/ucrt64/bin/g++.exe", //Replace this with your compiler
             "args": [
                 "-fdiagnostics-color=always",
+                "-mwindows", //Toggles Debug console off
                 "-g",
                 "-I${fileDirname}/external/raylib/src",
                 "-L${fileDirname}/external/raylib/src",
@@ -15,7 +16,7 @@
                 "-lgdi32",
                 "-lwinmm",
                 "-o",
-                "C:/GitHub/SnakeGame/bin/game.exe" //Replace this with where you want the .exe to be generated
+                "C:/GitHub/SnakeGame/bin/SnakeGame.exe" //Replace this with where you want the .exe to be generated
             ],
             "options": {
                 //"cwd": "C:/msys64/ucrt64/bin" //I don't know if I need this

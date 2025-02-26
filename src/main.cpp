@@ -5,4 +5,9 @@ int main() {
     game.play();
 }
 
-// ctr shift B
+/*
+Todo:
+    - When the snake moves, create a new bodypart where the head initially was and deleted the oldest bodypart
+    - UI
+    - Gameplay probably
+*/
