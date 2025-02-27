@@ -1,4 +1,5 @@
 #pragma once
+
 #include <raylib.h>
 #include <vector>
 
@@ -26,6 +27,7 @@ class Snake{
 };
 
 class Game{
+    
     public:
     
         Game();
@@ -43,6 +45,9 @@ class Game{
     private:
 
         Snake snake;
+
+        int m_screenWidth = GetScreenWidth();
+        int m_screenHeight = GetScreenHeight();
 
     };
 
