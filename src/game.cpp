@@ -89,14 +89,20 @@ void Game::update(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES])
     the player will only visually move a full tile at a time.
     */
 
-    for(int i = 0; i < NUMBER_OF_TILES; i++){
-        for(int i2 = 0; i2 < NUMBER_OF_TILES; i2++){
+    if (IsWindowResized()) {
 
-            tiles[i][i2].position.x = double(m_screenWidth / NUMBER_OF_TILES) * i;
-            tiles[i][i2].position.y = double(m_screenHeight / NUMBER_OF_TILES) * i2;
+            for(int i = 0; i < NUMBER_OF_TILES; i++) {
+                for(int i2 = 0; i2 < NUMBER_OF_TILES; i2++) {
 
-        }
+                tiles[i][i2].position.x = double(m_screenWidth / NUMBER_OF_TILES) * i;
+                tiles[i][i2].position.y = double(m_screenHeight / NUMBER_OF_TILES) * i2;
+
+                }
+            }
+
+            m_playArea = getMaxSquareSize();
     }
+    
 
 }
 
@@ -191,4 +197,23 @@ void Game::headPosOverflow(Snake& snake) {
         snake.m_headPosition.y += NUMBER_OF_TILES;
     }
 
+}
+
+Vector2 Game::getMaxSquareSize() {
+
+    Vector2 perfectSquareDimensions;
+
+    if(m_screenWidth < m_screenHeight) {
+        // If the screen width is less than the height, use width for square size
+        perfectSquareDimensions.x = m_screenWidth;
+        perfectSquareDimensions.y = m_screenWidth;
+
+    } else {
+        // If the screen height is less than the width, use height for square size
+        perfectSquareDimensions.x = m_screenHeight;
+        perfectSquareDimensions.y = m_screenHeight;
+
+    }
+
+    return perfectSquareDimensions;
 }

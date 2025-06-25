@@ -38,7 +38,8 @@ class Game{
         void update(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]);
         void draw(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]);
         void getInput(Snake& snake);
-        void headPosOverflow(Snake& snake); //probably needs a better name
+        void headPosOverflow(Snake& snake); //probably needs a better name#
+        Vector2 getMaxSquareSize();
 
         bool collisionDetected();
 
@@ -48,11 +49,16 @@ class Game{
 
         int m_screenWidth = GetScreenWidth();
         int m_screenHeight = GetScreenHeight();
+        Vector2 m_playArea; //Should probably not use a vector for this(due to type conversion nonsense, floating point inaccuracy, etc), but it is convenient for now
 
     };
 
 
 
+
+    /*
+        Delete oldest part and create a new one in the previous head
+    */
  struct bodyPart
 {
     bodyPart() {
