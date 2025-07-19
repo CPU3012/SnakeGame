@@ -25,8 +25,12 @@ void Game::init(int WINDOW_WIDTH, int WINDOW_HEIGHT){
 }
 
 void Game::play() {
-
+    m_screenWidth = GetScreenWidth();
+    m_screenHeight = GetScreenHeight();
     Tile tiles[NUMBER_OF_TILES][NUMBER_OF_TILES];
+    
+    calculateSquareDimensions(m_squareSize, m_offsetX, m_offsetY);
+    recalcTiles(tiles);
 
     // Main game loop
     while (!WindowShouldClose()) {
@@ -47,7 +51,9 @@ void Game::play() {
 void Game::update(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]) {
 
     double frameTime = GetFrameTime();
-    
+    m_screenWidth = GetScreenWidth();
+    m_screenHeight = GetScreenHeight();
+
     Vector2 oldSnakePosition;
     switch (snake.m_direction)
     {
@@ -90,17 +96,8 @@ void Game::update(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES])
     */
 
     if (IsWindowResized()) {
-
-            for(int i = 0; i < NUMBER_OF_TILES; i++) {
-                for(int i2 = 0; i2 < NUMBER_OF_TILES; i2++) {
-
-                tiles[i][i2].position.x = double(m_screenWidth / NUMBER_OF_TILES) * i;
-                tiles[i][i2].position.y = double(m_screenHeight / NUMBER_OF_TILES) * i2;
-
-                }
-            }
-
-            m_playArea = getMaxSquareSize();
+        calculateSquareDimensions(m_squareSize, m_offsetX, m_offsetY);
+        recalcTiles(tiles);
     }
     
 
@@ -133,8 +130,8 @@ void Game::draw(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]) {
                 int(tiles[i][i2].position.x),
                 int(tiles[i][i2].position.y),
 
-                m_screenWidth / NUMBER_OF_TILES,
-                m_screenHeight / NUMBER_OF_TILES,
+                (m_squareSize / NUMBER_OF_TILES),
+                (m_squareSize / NUMBER_OF_TILES),
 
                 tileColour
 
@@ -143,14 +140,15 @@ void Game::draw(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]) {
         }
     }
 
+   
     //Draw player
     DrawRectangle(
 
         int(tiles[int(playerPostion.x)][int(playerPostion.y)].position.x), 
         int(tiles[int(playerPostion.x)][int(playerPostion.y)].position.y),
 
-        (m_screenWidth / NUMBER_OF_TILES),
-        (m_screenHeight / NUMBER_OF_TILES),
+        (m_squareSize / NUMBER_OF_TILES),
+        (m_squareSize / NUMBER_OF_TILES),
 
         snake.m_headColour
 
@@ -199,21 +197,25 @@ void Game::headPosOverflow(Snake& snake) {
 
 }
 
-Vector2 Game::getMaxSquareSize() {
+void Game::recalcTiles(Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]) {
 
-    Vector2 perfectSquareDimensions;
+    for(int i = 0; i < NUMBER_OF_TILES; i++) {
+        for(int i2 = 0; i2 < NUMBER_OF_TILES; i2++) {
 
-    if(m_screenWidth < m_screenHeight) {
-        // If the screen width is less than the height, use width for square size
-        perfectSquareDimensions.x = m_screenWidth;
-        perfectSquareDimensions.y = m_screenWidth;
+        tiles[i][i2].position.x = double(m_squareSize / NUMBER_OF_TILES * i) + m_offsetX;
+        tiles[i][i2].position.y = double(m_squareSize / NUMBER_OF_TILES * i2) + m_offsetY;
 
-    } else {
-        // If the screen height is less than the width, use height for square size
-        perfectSquareDimensions.x = m_screenHeight;
-        perfectSquareDimensions.y = m_screenHeight;
-
+        }
     }
+}
 
-    return perfectSquareDimensions;
+// Calculate and store the dimensions of a perfect square that fits inside the window
+void Game::calculateSquareDimensions(int& squareSize, int& offsetX, int& offsetY) {
+
+    // Determine the size of the square (smallest dimension)
+    squareSize = std::min(m_screenWidth, m_screenHeight);
+
+    // Calculate offsets to center the square in the window
+    offsetX = (m_screenWidth - squareSize) / 2;
+    offsetY = (m_screenHeight - squareSize) / 2;
 }

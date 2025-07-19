@@ -39,13 +39,19 @@ class Game{
         void draw(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]);
         void getInput(Snake& snake);
         void headPosOverflow(Snake& snake); //probably needs a better name#
-        Vector2 getMaxSquareSize();
-
+        void recalcTiles(Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]);
+        void calculateSquareDimensions(int& squareSize, int& offsetX, int& offsetY);
+        
         bool collisionDetected();
 
+        Vector2 getMaxSquareSize();
     private:
 
         Snake snake;
+
+        int m_squareSize = 0;
+        int m_offsetX = 0;   
+        int m_offsetY = 0;
 
         int m_screenWidth = GetScreenWidth();
         int m_screenHeight = GetScreenHeight();
