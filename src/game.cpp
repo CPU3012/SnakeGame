@@ -1,7 +1,10 @@
 #include "game.hpp"
+
 #include <raylib.h>
 #include <vector>
 #include <algorithm>
+#include <cstdlib> 
+#include <ctime>
 
 Game::Game() {
     init(800, 800); // Initial Window Dimentions
@@ -13,18 +16,21 @@ Game::~Game(){
 void Game::init(int WINDOW_WIDTH, int WINDOW_HEIGHT){
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "CPU's Snake Game");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake Game");
     SetExitKey(KEY_NULL);
 
     snake.m_headColour = BLUE;
     snake.m_length = 0;
-    snake.speed = 2.0;
-    snake.m_direction = 90;
+    snake.speed = 3.0; // Set the speed of the snake
+    snake.m_direction = 90; // Initial direction (0 = up, 90 = right, 180 = down, 270 = left)
     snake.m_headPosition.x = 0; snake.m_headPosition.y = 0;
 
+    // Initialize random seed
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
 }
 
 void Game::play() {
+
     m_screenWidth = GetScreenWidth();
     m_screenHeight = GetScreenHeight();
     Tile tiles[NUMBER_OF_TILES][NUMBER_OF_TILES];
@@ -32,13 +38,24 @@ void Game::play() {
     calculateSquareDimensions(m_squareSize, m_offsetX, m_offsetY);
     recalcTiles(tiles);
 
+    // --- Spawn apples at random positions ---
+    apples.clear();
+    int numApples = 3; // Set how many apples you want
+    srand((unsigned int)time(nullptr));
+    for (int i = 0; i < numApples; ++i) {
+        Vector2 pos;
+        pos.x = rand() % NUMBER_OF_TILES;
+        pos.y = rand() % NUMBER_OF_TILES;
+        apples.emplace_back(pos, CollisionObject::Apple, RED);
+    }
+
     // Main game loop
     while (!WindowShouldClose()) {
         
         m_screenWidth = GetScreenWidth();
         m_screenHeight = GetScreenHeight();
 
-        //if(collisionDetected()) return;
+        collisionChecks(snake, tiles);
         getInput(snake);
         update(snake, tiles);
         draw(snake, tiles);
@@ -140,7 +157,21 @@ void Game::draw(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]) {
         }
     }
 
-   
+    // Draw apples
+    for (const auto& apple : apples) {
+    // Clamp apple position to board limits, idk if this is necessary but I did it anyway
+    int x = std::clamp(int(apple.position.x), 0, NUMBER_OF_TILES - 1);
+    int y = std::clamp(int(apple.position.y), 0, NUMBER_OF_TILES - 1);
+
+    DrawRectangle(
+        int(tiles[x][y].position.x),
+        int(tiles[x][y].position.y),
+        (m_squareSize / NUMBER_OF_TILES),
+        (m_squareSize / NUMBER_OF_TILES),
+        apple.colour
+    );
+}
+
     //Draw player
     DrawRectangle(
 
@@ -218,4 +249,42 @@ void Game::calculateSquareDimensions(int& squareSize, int& offsetX, int& offsetY
     // Calculate offsets to center the square in the window
     offsetX = (m_screenWidth - squareSize) / 2;
     offsetY = (m_screenHeight - squareSize) / 2;
+}
+
+bool Game::collisionChecks(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]) {
+
+    // Check for collisions with bombs or body parts
+    for (const auto& bomb : bombs) {
+        if (bomb.isColliding(snake.m_headPosition)) {
+            // Handle bomb collision, e.g., end game or reduce snake length
+            return true; // Collision detected
+        }
+    }
+    for (const auto& bodyPart : bodyParts) {
+        if (bodyPart.isColliding(snake.m_headPosition)) {
+            // Handle collision with snake's own body
+            return true; // Collision detected
+        }
+    }
+
+    // Check for collisions with apples
+    for (int i = 0; i < apples.size(); ++i) {
+        CollisionObject& apple = apples[i];
+        
+        // Check if the snake's head collides with the apple
+        if (apple.isColliding(snake.m_headPosition)) {
+            // Handle apple eaten, e.g., increase snake length, remove apple, etc.
+            apples.erase(apples.begin() + i); // Remove the apple
+            snake.m_length++; // Increase snake length
+            // Optionally, spawn a new apple at a random position
+            // add another body part to the vector of body parts
+
+            return true; // Collision detected
+        }
+    }
+
+    
+    // Placeholder for collision detection logic
+    // This function should return true if a collision is detected
+    return false;
 }

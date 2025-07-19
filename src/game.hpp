@@ -7,6 +7,7 @@
 
 class Tile;
 struct bodyPart;
+struct CollisionObject;
 
 class Snake{
  
@@ -42,12 +43,19 @@ class Game{
         void recalcTiles(Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]);
         void calculateSquareDimensions(int& squareSize, int& offsetX, int& offsetY);
         
-        bool collisionDetected();
+        bool collisionChecks(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]);
 
         Vector2 getMaxSquareSize();
+        int getScore() const {
+            return snake.m_length;
+        }
     private:
 
         Snake snake;
+
+        std::vector<CollisionObject> apples;
+        std::vector<CollisionObject> bombs;
+        std::vector<CollisionObject> bodyParts;
 
         int m_squareSize = 0;
         int m_offsetX = 0;   
@@ -55,7 +63,6 @@ class Game{
 
         int m_screenWidth = GetScreenWidth();
         int m_screenHeight = GetScreenHeight();
-        Vector2 m_playArea; //Should probably not use a vector for this(due to type conversion nonsense, floating point inaccuracy, etc), but it is convenient for now
 
     };
 
@@ -77,16 +84,34 @@ class Game{
 
 };
 
+struct CollisionObject
+{
+    enum Type {
+        Head, // currently unused
+        Body,
+        Apple,
+        Bomb,
+        Tile
+    };
 
+    Vector2 position;
+    Type type;
+    Color colour;
+
+    CollisionObject(Vector2 pos, Type t, Color c)
+        : position(pos), type(t), colour(c) {}
+
+    // Simple collision check (tile-based)
+    bool isColliding(const Vector2& otherPos) const {
+        return (int)position.x == (int)otherPos.x && (int)position.y == (int)otherPos.y;
+    }
+};
 class Tile{
 
     public:
         
         Vector2 position;
 
-        enum tileHat{
-            apple,
-            bomb
-        };
+      
 
 };
