@@ -38,9 +38,13 @@ void Game::play() {
     calculateSquareDimensions(m_squareSize, m_offsetX, m_offsetY);
     recalcTiles(tiles);
 
+    // --- Initialize body parts ---
+    bodyParts.clear();
+
+
     // --- Spawn apples at random positions ---
     apples.clear();
-    int numApples = 3; // Set how many apples you want
+    int numApples = 3; // Set how many apples you want initially
     srand((unsigned int)time(nullptr));
     for (int i = 0; i < numApples; ++i) {
         Vector2 pos;
@@ -71,7 +75,7 @@ void Game::update(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES])
     m_screenWidth = GetScreenWidth();
     m_screenHeight = GetScreenHeight();
 
-    Vector2 oldSnakePosition;
+    Vector2 oldSnakePosition = snake.m_headPosition;
     switch (snake.m_direction)
     {
     case 0:
@@ -111,6 +115,18 @@ void Game::update(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES])
     The head position is always rounded down before rendering, this means 
     the player will only visually move a full tile at a time.
     */
+
+    // if the sake's head position has changed and is now on a different tile than before, a new body part is created at the old position and the oldest body part is removed
+
+    if ((int)oldSnakePosition.x != (int)snake.m_headPosition.x || (int)oldSnakePosition.y != (int)snake.m_headPosition.y) {
+        // Create a new body part at the old head position
+        bodyParts.emplace_back(oldSnakePosition, CollisionObject::Body, snake.m_headColour);
+
+        // Remove the oldest body part if the snake has grown beyond its length
+        if (bodyParts.size() > snake.m_length) {
+            bodyParts.erase(bodyParts.begin());
+        }
+    }
 
     if (IsWindowResized()) {
         calculateSquareDimensions(m_squareSize, m_offsetX, m_offsetY);
@@ -185,8 +201,25 @@ void Game::draw(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_OF_TILES]) {
 
     );
 
+    // Draw body parts
+    for(const auto& part : bodyParts) {
+        // Clamp body part position to board limits
+        int x = std::clamp(int(part.position.x), 0, NUMBER_OF_TILES - 1);
+        int y = std::clamp(int(part.position.y), 0, NUMBER_OF_TILES - 1);
+
+        DrawRectangle(
+            int(tiles[x][y].position.x),
+            int(tiles[x][y].position.y),
+            (m_squareSize / NUMBER_OF_TILES),
+            (m_squareSize / NUMBER_OF_TILES),
+            part.colour
+        );
+    }
+
     EndDrawing();
 }
+
+
 
 void Game::getInput(Snake& snake) {
     
@@ -269,14 +302,19 @@ bool Game::collisionChecks(Snake& snake, Tile (&tiles)[NUMBER_OF_TILES][NUMBER_O
 
     // Check for collisions with apples
     for (int i = 0; i < apples.size(); ++i) {
-        CollisionObject& apple = apples[i];
         
         // Check if the snake's head collides with the apple
-        if (apple.isColliding(snake.m_headPosition)) {
+        if (apples[i].isColliding(snake.m_headPosition)) {
             // Handle apple eaten, e.g., increase snake length, remove apple, etc.
             apples.erase(apples.begin() + i); // Remove the apple
             snake.m_length++; // Increase snake length
-            // Optionally, spawn a new apple at a random position
+            
+            srand((unsigned int)time(nullptr));
+            Vector2 pos;
+            pos.x = rand() % NUMBER_OF_TILES;
+            pos.y = rand() % NUMBER_OF_TILES;
+            apples.emplace_back(pos, CollisionObject::Apple, RED);
+
             // add another body part to the vector of body parts
 
             return true; // Collision detected
